@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/prabhavalabs/atlas/security/advisories/new
+    about: Report vulnerabilities privately. Do not disclose them in a public issue.
+  - name: Project discussions
+    url: https://github.com/prabhavalabs/atlas/discussions
+    about: Discuss product ideas and broader questions before proposing large changes.

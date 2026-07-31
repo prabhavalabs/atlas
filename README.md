@@ -1,0 +1,63 @@
+# Atlas
+
+**Global disaster intelligence, built in the open.**
+
+Atlas is an open-source platform from Prabhava Labs for monitoring disasters around the world. It is designed to aggregate authoritative alerts, humanitarian updates, maps, news, event timelines, and cited situation reports into a public experience that works without an account.
+
+> [!IMPORTANT]
+> Atlas is currently in the architecture and implementation-planning phase. It is not yet a production service and must not be used as an emergency alerting authority.
+
+## Product experience
+
+Atlas will provide two deliberately separate interfaces:
+
+- **Public platform:** account-free active-event map and list, filters, search, event narratives, timelines, source health, news, and situation reports.
+- **Administration portal:** evidence review, event correlation and correction, timeline/report editing, source health, publication, and an immutable audit trail.
+
+Every published factual claim is expected to retain a source. Preliminary, automatic, estimated, conflicting, and unknown information remain visibly distinct.
+
+## Architecture direction
+
+- Go 1.26 modular monolith
+- PostgreSQL with PostGIS
+- PostgreSQL-backed durable jobs; no external queue or Redis
+- React, Vite, TypeScript, TanStack Query, Zustand, and shadcn/ui
+- MapLibre GL JS with configurable map delivery
+- Deterministic timelines and reports that work without AI
+- Optional evidence-bounded, human-reviewed AI report rendering
+- Three-container VPS deployment: Caddy, application, and database
+
+The project intentionally excludes microservice sprawl, browser crawling, general web search, a vector database, and agent-led publication from its initial complexity budget.
+
+## Documentation
+
+Start with the [documentation index](docs/README.md).
+
+- [Product vision](docs/01-product-vision.md)
+- [Experience design](docs/02-experience-design.md)
+- [Architecture](docs/05-architecture.md)
+- [Data model](docs/06-data-model.md)
+- [Data sources](docs/07-data-sources.md)
+- [Reports and optional AI](docs/08-reports-and-ai.md)
+- [Deployment and operations](docs/10-deployment-and-operations.md)
+- [Costs](docs/11-cost-model.md)
+- [Roadmap](docs/13-roadmap.md)
+- [Master implementation plan](docs/superpowers/plans/2026-07-31-atlas-master.md)
+
+## Project status
+
+The documentation-first foundation is complete. Development begins only after the remaining Phase 0 design, source-licensing, VPS, and public-domain gates are resolved. The implementation plans are test-first and broken into independently reviewable phases.
+
+## Contributing
+
+Atlas welcomes careful contributions from the disaster-management, humanitarian, geospatial, journalism, accessibility, and open-source communities. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
+
+Incorrect disaster information should be reported with the dedicated correction issue template. Security vulnerabilities must be reported privately as described in [SECURITY.md](SECURITY.md).
+
+## Safety
+
+Atlas aggregates third-party information and may be incomplete, delayed, or incorrect. It does not replace local authorities, emergency services, official warnings, or professional judgment. Life-safety decisions must be based on information from the responsible local or national authority.
+
+## License
+
+Atlas is licensed under the [Apache License 2.0](LICENSE). Data and third-party components retain their own licenses and attribution requirements; these are tracked in [NOTICE](NOTICE) and the source registry.

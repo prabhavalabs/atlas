@@ -1,0 +1,47 @@
+name: Data-source proposal
+description: Propose an authoritative public disaster or humanitarian data source.
+title: "source: "
+labels: ["source-proposal", "needs-triage"]
+body:
+  - type: input
+    id: authority
+    attributes:
+      label: Owning authority
+      description: Organization responsible for publishing the data.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Geographic and hazard scope
+      description: Countries, regions, hazards, and event lifecycle covered.
+    validations:
+      required: true
+  - type: input
+    id: access
+    attributes:
+      label: Official API or feed
+      description: Direct official documentation URL, not a search-result page.
+    validations:
+      required: true
+  - type: input
+    id: terms
+    attributes:
+      label: Terms or license
+      description: URL describing reuse, attribution, and retention rights.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Update and failure behavior
+      description: Explain identity, revisions, cancellation, test messages, cadence, rate limits, and known outages.
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: User value
+      description: What reliable capability or coverage gap would this source address?
+    validations:
+      required: true

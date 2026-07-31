@@ -1,0 +1,20 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Editors and local tooling
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build and test output
+bin/
+dist/
+coverage/
+tmp/
+*.out
+
+# Dependencies
+node_modules/

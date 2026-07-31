@@ -1,0 +1,37 @@
+name: Information correction
+description: Report disaster information that appears incorrect, outdated, or misleading.
+title: "correction: "
+labels: ["information-correction", "needs-triage"]
+body:
+  - type: input
+    id: atlas_url
+    attributes:
+      label: Atlas page or event
+      description: Link to or identify the affected Atlas content.
+    validations:
+      required: true
+  - type: textarea
+    id: claim
+    attributes:
+      label: Information to correct
+      description: Quote or describe the specific claim, figure, status, geometry, or source link.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Authoritative evidence
+      description: Link to the responsible authority or another reliable source, including its publication time.
+    validations:
+      required: true
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Potential impact
+      options:
+        - Life-safety or active emergency information
+        - Significant factual error
+        - Outdated information
+        - Attribution, wording, or minor detail
+    validations:
+      required: true
