@@ -6,6 +6,7 @@
 # Editors and local tooling
 .idea/
 .vscode/
+.worktrees/
 *.swp
 *.swo
 
