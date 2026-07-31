@@ -1,11 +1,11 @@
-# Atlas planning documentation
+# Atlas product and engineering documentation
 
-- **Status:** architecture and implementation planning
+- **Status:** foundation implemented; source ingestion and editorial depth in progress
 - **Product name:** Atlas
 - **Owner:** Prabhava Labs
 - **Last reviewed:** 2026-07-31
 
-Atlas is an open-source, public-first disaster monitoring platform from Prabhava Labs. It will combine authoritative alerts, humanitarian updates, maps, news, and cited situation reports without requiring a public account. The repository identity is `prabhavalabs/atlas`; legal and domain clearance remains a release gate.
+Atlas is an open-source, public-first disaster monitoring platform from Prabhava Labs. It combines a public disaster view with an authenticated evidence-review workspace. The repository identity is `prabhavalabs/atlas`.
 
 This directory is the source of truth for the product and technical plan. No predecessor names, private repository identifiers, internal endpoints, customer information, or proprietary implementation details belong in this public documentation.
 
@@ -21,8 +21,8 @@ This directory is the source of truth for the product and technical plan. No pre
 | Maps | MapLibre GL JS; configurable tile provider; low-zoom self-hosted PMTiles fallback |
 | Search | PostgreSQL full-text and trigram search; no Elasticsearch or vector database |
 | AI | Optional report renderer behind a provider interface; deterministic reports always work |
-| Deployment | One VPS with Docker Compose, Caddy, one application image, and PostGIS |
-| Core containers | Three: Caddy, application, database |
+| Deployment | One VPS with Docker Compose and outbound-only Cloudflare Tunnel ingress |
+| Core containers | Three: application, PostGIS, cloudflared |
 | License | Apache-2.0 |
 | MVP sources | GDACS, USGS earthquakes, NASA EONET, ReliefWeb, and selected official RSS/Atom/CAP feeds |
 
@@ -42,6 +42,8 @@ This directory is the source of truth for the product and technical plan. No pre
 - [Risks and mitigations](12-risks.md)
 - [Roadmap and scope](13-roadmap.md)
 - [Testing and quality](14-testing-and-quality.md)
+- [Approved interface direction](design/README.md)
+- [OpenAPI contract](../api/openapi.yaml)
 
 ## Architecture decisions
 
@@ -51,10 +53,11 @@ This directory is the source of truth for the product and technical plan. No pre
 - [ADR 0004: public and admin route separation](decisions/0004-public-admin-separation.md)
 - [ADR 0005: map delivery](decisions/0005-map-delivery.md)
 - [ADR 0006: open-source license](decisions/0006-open-source-license.md)
+- [ADR 0007: outbound-only Cloudflare Tunnel ingress](decisions/0007-cloudflare-tunnel.md)
 
 ## Implementation plans
 
-Development should not begin until the foundation plan's decision gates are resolved. Plans are ordered, test-first, and independently reviewable:
+These plans preserve the intended delivery sequence. The foundation, public shell, and administration shell have been implemented; later plans remain independently reviewable roadmap slices:
 
 1. [Master delivery plan](superpowers/plans/2026-07-31-atlas-master.md)
 2. [Repository and application foundation](superpowers/plans/2026-07-31-foundation.md)

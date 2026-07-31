@@ -1,0 +1,11 @@
+.git
+.github
+.worktrees
+.env
+atlas
+deploy/secrets
+docs/design/*.png
+web/dist
+web/node_modules
+**/*_test.go
+**/.DS_Store

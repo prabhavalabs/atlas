@@ -5,7 +5,7 @@
 Atlas is an open-source platform from Prabhava Labs for monitoring disasters around the world. It is designed to aggregate authoritative alerts, humanitarian updates, maps, news, event timelines, and cited situation reports into a public experience that works without an account.
 
 > [!IMPORTANT]
-> Atlas is currently in the architecture and implementation-planning phase. It is not yet a production service and must not be used as an emergency alerting authority.
+> Atlas is an early foundation release. Its source coverage is not yet sufficient for life-safety use, and it must not be treated as an emergency alerting authority.
 
 ## Product experience
 
@@ -25,7 +25,7 @@ Every published factual claim is expected to retain a source. Preliminary, autom
 - MapLibre GL JS with configurable map delivery
 - Deterministic timelines and reports that work without AI
 - Optional evidence-bounded, human-reviewed AI report rendering
-- Three-container VPS deployment: Caddy, application, and database
+- Three-container VPS deployment: application, PostGIS, and Cloudflare Tunnel
 
 The project intentionally excludes microservice sprawl, browser crawling, general web search, a vector database, and agent-led publication from its initial complexity budget.
 
@@ -44,9 +44,27 @@ Start with the [documentation index](docs/README.md).
 - [Roadmap](docs/13-roadmap.md)
 - [Master implementation plan](docs/superpowers/plans/2026-07-31-atlas-master.md)
 
-## Project status
+## Foundation status
 
-The documentation-first foundation is complete. Development begins only after the remaining Phase 0 design, source-licensing, VPS, and public-domain gates are resolved. The implementation plans are test-first and broken into independently reviewable phases.
+The repository contains a deployable walking skeleton: embedded migrations, a fixture-backed event path, cacheable public APIs, local administrator sessions and RBAC, audited optimistic updates, a public list/map experience, an administration sign-in/review view, durable PostgreSQL jobs, a generated OpenAPI client, and automated container delivery.
+
+Real-source ingestion, event correlation, full timelines and reports, editorial publication workflows, backups, and production hardening remain roadmap work. Current behavior and limitations are tracked in [the roadmap](docs/13-roadmap.md).
+
+## Local development
+
+Requirements are Go 1.26.5, Node.js 24, pnpm 11.11, Docker, and Docker Compose.
+
+```sh
+make bootstrap
+make test
+make build
+```
+
+Run PostGIS locally, export `ATLAS_DATABASE_URL`, `ATLAS_PUBLIC_URL`, and
+`ATLAS_API_URL`, then start the application with `go run ./cmd/atlas serve`.
+The production deployment template is `.env.example`; the Go process does not
+implicitly load dotenv files. Operator commands are `migrate`,
+`import-fixture`, `create-admin`, `healthcheck`, and `version`.
 
 ## Contributing
 

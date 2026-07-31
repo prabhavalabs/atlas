@@ -6,7 +6,7 @@
 
 **Architecture:** One Go command assembles modules and serves generated OpenAPI plus embedded Vite assets. Postgres owns durable state. The first vertical slice establishes conventions that later source and editorial work must follow.
 
-**Tech stack:** Go 1.26, chi, Huma, pgx/sqlc, Goose, PostgreSQL/PostGIS, React/Vite/TypeScript, TanStack Router/Query, Zustand, shadcn/ui, Docker Compose/Caddy.
+**Tech stack:** Go 1.26, chi, pgx/sqlc, Goose, OpenAPI 3.1, PostgreSQL/PostGIS, React/Vite/TypeScript, TanStack Router/Query, Zustand, shadcn/ui, Docker Compose, and Cloudflare Tunnel.
 
 ### Task 1: Bootstrap license, toolchain, and repository checks
 
@@ -42,7 +42,7 @@
 
 **Steps:**
 
-1. Write failing table tests for missing database URL, invalid public URL, invalid log level, unsafe session secret, and a minimal valid test configuration.
+1. Write failing table tests for missing database URL, invalid public URL, invalid log level, and a minimal valid test configuration.
 2. Implement a typed `Config` with explicit defaults and `Validate() error`; do not read environment variables outside the config package.
 3. Implement subcommands `serve`, `worker`, `migrate`, `admin`, and `import` with help text. Unimplemented subcommands return a clear non-zero error until their task lands.
 4. Inject build version, commit, and build time through linker flags and expose a plain Go `BuildInfo` value.
@@ -82,7 +82,7 @@
 **Steps:**
 
 1. Write failing handler tests for `/health/live`, `/health/ready`, `/api/v1/meta`, unknown route JSON problem response, request ID, method rejection, and body limit.
-2. Assemble chi/Huma with recovery, request ID, structured access log, security headers, compression boundaries, timeouts, and explicit CORS configuration.
+2. Assemble chi handlers with recovery, request ID, security headers, timeouts, explicit CORS, and a checked-in OpenAPI contract.
 3. Make liveness dependency-free; readiness checks database and schema compatibility.
 4. Return RFC 9457-style problem details with stable error codes and no internal error text.
 5. Generate OpenAPI, check it in, and add `make generate-check` that fails when regeneration changes files.
@@ -217,8 +217,8 @@
 **Files:**
 
 - Create: `Dockerfile`
-- Create: `deploy/compose.yaml`
-- Create: `deploy/Caddyfile`
+- Create: `deploy/compose.yml`
+- Create: `deploy/secrets/.gitkeep`
 - Create: `deploy/.env.example`
 - Create: `deploy/scripts/smoke.sh`
 - Create: `docs/self-hosting.md`
@@ -226,7 +226,7 @@
 **Steps:**
 
 1. Build frontend and Go binary in pinned build stages; final non-root image contains CA certificates, migrations, and frontend assets only.
-2. Add Caddy, app, and PostGIS services on a private network with health checks and explicit persistent volumes.
+2. Add cloudflared, app, and PostGIS services on isolated edge/data networks with health checks and an explicit persistent volume.
 3. Run migration as an explicit one-shot command before app startup; do not auto-run destructive migrations in every replica.
 4. Write smoke script using public meta/list/detail and admin login CSRF checks.
 5. From a clean Docker state, run `docker compose up -d`, import fixture, smoke test, restart all containers, and verify data persists.

@@ -4,17 +4,17 @@
 
 **Goal:** Make a release reproducibly installable, observable, recoverable, secure, and affordable on one VPS with documented upgrades and failure playbooks.
 
-**Architecture:** CI publishes a signed, SBOM-attached immutable image. Docker Compose runs Caddy, app, and PostGIS. Encrypted portable dumps/artifacts go to an operator-selected S3-compatible target. Health is visible in metrics and admin UI.
+**Architecture:** CI publishes an immutable image. Docker Compose runs cloudflared, app, and PostGIS without public host ports. Encrypted portable dumps/artifacts go to an operator-selected S3-compatible target. Health is visible in metrics and admin UI.
 
-**Tech stack:** Docker/Compose, Caddy, GitHub Actions, PostgreSQL tools, restic or S3 CLI, Trivy/Grype, Syft, Cosign, shell smoke scripts.
+**Tech stack:** Docker/Compose, Cloudflare Tunnel, GitHub Actions, PostgreSQL tools, restic or S3 CLI, Trivy/Grype, Syft, Cosign, and smoke scripts.
 
 ### Task 1: Harden production images and Compose
 
 **Files:**
 
 - Modify: `Dockerfile`
-- Modify: `deploy/compose.yaml`
-- Modify: `deploy/Caddyfile`
+- Modify: `deploy/compose.yml`
+- Modify: `deploy/secrets/.gitkeep`
 - Create: `deploy/compose.ollama.yaml`
 - Create: `deploy/compose.population.yaml`
 - Create: `deploy/security.md`

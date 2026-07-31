@@ -13,7 +13,7 @@ flowchart TB
     end
 
     subgraph VPS["Single VPS"]
-        Caddy["Caddy: TLS, compression, static/cache headers"]
+        Tunnel["cloudflared: outbound-only connector"]
         App["Go application"]
         DB[("PostgreSQL + PostGIS")]
 
@@ -26,7 +26,7 @@ flowchart TB
             Auth["Admin auth and audit"]
         end
 
-        Caddy --> App
+        Tunnel --> App
         App --> HTTP
         App --> Ingest
         App --> Events
@@ -39,11 +39,12 @@ flowchart TB
     APIs --> Ingest
     Feeds --> Ingest
     Reports --> Ingest
-    Browser["React/Vite public and admin SPA"] --> Caddy
+    Edge["Cloudflare DNS, TLS, CDN, and abuse controls"] --> Tunnel
+    Browser["React/Vite public and admin SPA"] --> Edge
     Backup["Encrypted off-site backup"] <-->|"daily"| DB
 ```
 
-The Vite build is embedded in the Go image or copied into it during the multi-stage build. Caddy terminates TLS and proxies `/api` while serving immutable assets efficiently. A separate worker process can be started from the same image only when load measurements justify it; it is not a different service or repository.
+The Vite build is copied into the distroless Go image during the multi-stage build. The Go process serves immutable assets, SPA fallbacks, and APIs. Cloudflare terminates public TLS and reaches the private Compose network through an outbound-only tunnel; the VPS exposes no Atlas HTTP port. A separate worker process can be started from the same image only when load measurements justify it; it is not a different service or repository.
 
 ## Complexity budget
 
@@ -51,7 +52,7 @@ The core production profile permits:
 
 - one Go application process;
 - one PostgreSQL/PostGIS database;
-- one Caddy reverse proxy;
+- one `cloudflared` connector;
 - local durable storage plus one off-site backup target;
 - external connections only to configured sources, optional map tiles, and an optional report model.
 
@@ -61,7 +62,7 @@ Adding Redis, a message broker, a vector database, a headless browser, an additi
 
 - Go 1.26, tracking the latest supported patch release.
 - `net/http` with `chi` for routing and middleware.
-- Huma for request/response validation and generated OpenAPI 3.1.
+- checked-in OpenAPI 3.1 with a generated TypeScript SDK and explicit Go handlers.
 - `pgx` and `sqlc` for typed database access.
 - Goose for forward-only SQL migrations.
 - Standard `log/slog` JSON logging.
@@ -123,7 +124,7 @@ Rules:
 
 ## Read path
 
-Public event summaries are ordinary indexed SQL read models. Responses include strong or weak ETags, `Last-Modified`, a generated-at timestamp, and source-coverage state. Caddy and browser caches may revalidate them. The last published event/report remains available during ingestion failures.
+Public event summaries are ordinary indexed SQL read models. Responses include strong ETags, `Last-Modified`, a generated-at timestamp, and source-coverage state. Cloudflare and browser caches may revalidate them. The last published event/report remains available during ingestion failures.
 
 High-traffic read models can later use PostgreSQL materialized views refreshed after publication. Redis is not the default answer.
 

@@ -4,9 +4,9 @@
 
 **Goal:** Deliver an account-free public disaster monitor and auditable administration portal that runs reliably on one VPS at minimal cost.
 
-**Architecture:** A Go 1.26 modular monolith owns PostgreSQL/PostGIS, source ingestion, durable jobs, event correlation, editorial state, local admin identity, and REST APIs. One React/Vite/TypeScript workspace provides code-split public and admin route shells. Caddy, the app image, and PostGIS form the three-container core deployment.
+**Architecture:** A Go 1.26 modular monolith owns PostgreSQL/PostGIS, source ingestion, durable jobs, event correlation, editorial state, local admin identity, and REST APIs. One React/Vite/TypeScript workspace provides code-split public and admin route shells. Cloudflared, the app image, and PostGIS form the three-container core deployment.
 
-**Tech stack:** Go 1.26, chi, Huma, pgx, sqlc, Goose, PostgreSQL/PostGIS, React, Vite, TypeScript, TanStack Router/Query, Zustand, shadcn/ui, Tailwind CSS, MapLibre GL JS, Vitest, Testing Library, MSW, Playwright, Docker Compose, Caddy.
+**Tech stack:** Go 1.26, chi, pgx, sqlc, Goose, OpenAPI 3.1, PostgreSQL/PostGIS, React, Vite, TypeScript, TanStack Router/Query, Zustand, shadcn/ui, Tailwind CSS, MapLibre GL JS, Vitest, Testing Library, MSW, Playwright, Docker Compose, and Cloudflare Tunnel.
 
 ## Decision gates before Task 1
 
@@ -38,8 +38,8 @@
 ├── web/                       # React/Vite application
 ├── testdata/sources/          # licensed/redacted source fixtures
 ├── deploy/
-│   ├── compose.yaml
-│   ├── Caddyfile
+│   ├── compose.yml
+│   ├── secrets/
 │   └── scripts/
 ├── docs/
 ├── api/openapi.yaml           # generated and checked in
@@ -83,7 +83,7 @@ npm --prefix web run lint
 npm --prefix web run typecheck
 npm --prefix web run test:run
 npm --prefix web run build
-docker compose -f deploy/compose.yaml config --quiet
+docker compose -f deploy/compose.yml config --quiet
 ```
 
 Before beta release also run:

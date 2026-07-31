@@ -1,0 +1,30 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - errorlint
+    - exhaustive
+    - gocritic
+    - misspell
+    - nilerr
+    - noctx
+    - prealloc
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - testifylint
+  exclusions:
+    presets:
+      - common-false-positives
+      - std-error-handling
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
