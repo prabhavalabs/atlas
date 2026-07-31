@@ -86,6 +86,16 @@ jobs:
         run: |
           ssh -i ~/.ssh/atlas_deploy "${VPS_USER}@${VPS_HOST}" 'install -d -m 0750 /opt/atlas /opt/atlas/secrets'
           scp -i ~/.ssh/atlas_deploy deploy/compose.yml "${VPS_USER}@${VPS_HOST}:/opt/atlas/compose.yml"
+      - name: Authenticate VPS to GHCR
+        shell: bash
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          VPS_HOST: ${{ secrets.ATLAS_VPS_HOST }}
+          VPS_USER: ${{ secrets.ATLAS_VPS_USER }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | ssh -i ~/.ssh/atlas_deploy "${VPS_USER}@${VPS_HOST}" \
+            "docker login ghcr.io --username '${GHCR_USER}' --password-stdin"
       - name: Pull, migrate, and health-check
         shell: bash
         env:
@@ -96,6 +106,7 @@ jobs:
           ssh -i ~/.ssh/atlas_deploy "${VPS_USER}@${VPS_HOST}" "DEPLOY_IMAGE='${DEPLOY_IMAGE}' bash -s" <<'REMOTE'
           set -euo pipefail
           cd /opt/atlas
+          trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
           test -f .env
           test -s secrets/cloudflare_tunnel_token
           previous_image="$(docker inspect atlas-app-1 --format '{{.Config.Image}}' 2>/dev/null || true)"
