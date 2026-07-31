@@ -8,7 +8,7 @@ Atlas targets one Linux VPS with Docker Engine and the Compose plugin:
 Browser
   -> Cloudflare DNS/TLS/CDN
       -> outbound Cloudflare Tunnel
-          -> Atlas app :8080 on atlas_edge
+          -> Atlas app :8081 on atlas_edge
               -> PostgreSQL/PostGIS :5432 on internal atlas_data
 ```
 
@@ -33,16 +33,19 @@ Those features require measured CPU, memory, storage, and failure isolation.
 `.env.example` is the complete non-secret template. Production uses
 `/opt/atlas/.env` with mode `0600`; it contains the database URL/password,
 metrics token, public/API URLs, CORS origin, and cookie domain.
-The Cloudflare tunnel token is a separate root-readable file at
+The Cloudflare tunnel token is a separate deployment-user-readable file at
 `/opt/atlas/secrets/cloudflare_tunnel_token` and reaches cloudflared through
 `TUNNEL_TOKEN_FILE`, so it does not appear in the process command line.
+`ATLAS_RUNTIME_UID` and `ATLAS_RUNTIME_GID` must match the owner of this `0600`
+file (UID/GID 1000 in the reference VPS setup). This lets cloudflared read the
+secret without making it group- or world-readable.
 
 Required public endpoints are:
 
 - `https://atlas.prabhavalabs.com` for the public application and `/admin`;
 - `https://atlas-api.prabhavalabs.com` for `/api`, health, and protected metrics.
 
-Both Cloudflare public hostnames route to `http://app:8080`. Browser credentials
+Both Cloudflare public hostnames route to `http://app:8081`. Browser credentials
 work because both hosts are same-site and the CSRF cookie domain is
 `prabhavalabs.com` so the readable, non-secret CSRF token is available to both
 single-level application hosts. The opaque session cookie remains host-only on

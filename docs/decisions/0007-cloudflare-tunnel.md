@@ -14,7 +14,7 @@ public database or application port.
 
 Run a pinned `cloudflared` container beside the app and PostGIS. Cloudflare owns
 public DNS/TLS and routes both Atlas hostnames through an outbound-only tunnel to
-`http://app:8080`. Store the remotely managed tunnel token in a Compose secret
+`http://app:8081`. Store the remotely managed tunnel token in a Compose secret
 file and pass its path through `TUNNEL_TOKEN_FILE`.
 
 The Go application serves both APIs and built Vite assets. The data network is
@@ -27,7 +27,7 @@ no Atlas host port.
 - TLS, basic DDoS protection, and CDN revalidation fit Cloudflare's free plan.
 - Public availability depends on Cloudflare and outbound access to its edge.
 - Self-hosters who avoid Cloudflare may place any TLS reverse proxy in front of
-  `app:8080`; application and data boundaries do not depend on Cloudflare APIs.
+  `app:8081`; application and data boundaries do not depend on Cloudflare APIs.
 - The token can start the tunnel and therefore requires file permissions,
   rotation, and repository-secret handling equivalent to a production credential.
 

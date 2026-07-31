@@ -31,7 +31,8 @@ services:
         condition: service_healthy
     environment:
       ATLAS_ENVIRONMENT: production
-      ATLAS_HTTP_ADDRESS: 0.0.0.0:8080
+      ATLAS_HTTP_ADDRESS: 0.0.0.0:8081
+      ATLAS_HEALTH_URL: http://127.0.0.1:8081/health/live
       ATLAS_WEB_ROOT: /app/web
       ATLAS_DATABASE_URL: ${ATLAS_DATABASE_URL:?ATLAS_DATABASE_URL is required}
       ATLAS_PUBLIC_URL: ${ATLAS_PUBLIC_URL:-https://atlas.prabhavalabs.com}
@@ -43,7 +44,7 @@ services:
       ATLAS_SESSION_TTL: 12h
       ATLAS_LOG_LEVEL: info
       ATLAS_METRICS_TOKEN: ${ATLAS_METRICS_TOKEN:?ATLAS_METRICS_TOKEN is required}
-    expose: ["8080"]
+    expose: ["8081"]
     healthcheck:
       test: ["CMD", "/usr/local/bin/atlas", "healthcheck"]
       interval: 15s
@@ -61,6 +62,7 @@ services:
 
   cloudflared:
     image: cloudflare/cloudflared:2026.7.3
+    user: "${ATLAS_RUNTIME_UID:-1000}:${ATLAS_RUNTIME_GID:-1000}"
     restart: unless-stopped
     depends_on:
       app:
