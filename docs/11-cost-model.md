@@ -8,7 +8,7 @@ Prices were checked on 2026-07-31 and are planning estimates, not commitments. P
 |---|---:|---|
 | Existing VPS | $0 incremental | Requires roughly 4 vCPU, 8 GB RAM, 80–160 GB SSD |
 | Data-source APIs | $0 | MVP sources are free/public; ReliefWeb app name approval and NASA FIRMS key are administrative, not paid |
-| Database, proxy, application | $0 | Open-source, self-hosted |
+| Database, tunnel, application | $0 | Open-source application/PostGIS; Cloudflare Tunnel is available on the free plan |
 | Map tiles | $0 initially | OpenFreeMap public service plus self-hosted low-zoom fallback; no SLA |
 | Off-site backup | $0–$1 | Small B2 usage can fit its current first-10-GB allowance; storage starts around $6.95/TB/month beyond that |
 | AI | $0 | Deterministic reports; optional generation disabled |

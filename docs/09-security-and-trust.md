@@ -29,18 +29,19 @@ Trust boundaries are:
 | Dependency or image compromise | Locked dependencies, automated updates, SBOM, provenance/signing, vulnerability scan, minimal images |
 | Credential exposure | Environment/secret files outside Git, startup redaction, least privilege, secret scan, rotation runbook |
 | Data loss/ransomware | Encrypted off-site backups, immutable/versioned target where available, monthly restore drill |
-| Traffic exhaustion | Caddy and application rate limits, bounded queries, database timeouts, cached public reads |
+| Traffic exhaustion | Cloudflare edge controls, bounded application inputs, database timeouts, cached public reads |
 
 ## Administration authentication
 
-MVP administration is local to the installation; there is no third-party identity dependency. The bootstrap CLI creates the first administrator from an interactive prompt. Passwords use Argon2id with parameters benchmarked for the VPS. Sessions are random, hashed in the database, rotated at login/privilege change, idle-expiring, and revocable.
+MVP administration is local to the installation; there is no third-party identity dependency. The bootstrap CLI creates the first administrator with a password read from standard input. Passwords use Argon2id. Sessions and CSRF secrets are independent random values and only their hashes are stored in the database. The session cookie is HttpOnly; a same-site readable CSRF cookie restores double-submit protection after a page reload. Sessions are expiring and revocable.
 
-Initial roles are `admin` and `editor`:
+Initial roles are `administrator`, `editor`, and `viewer`:
 
 - editor: review evidence, edit events/timelines/reports, request generation;
-- admin: editor capabilities plus publish/unpublish, manage users/sources, restore/replay jobs, and configuration changes.
+- administrator: editor capabilities plus publication and operational management;
+- viewer: read-only administrative visibility.
 
-Single-user deployments can assign `admin`; the authorization boundary still exists and is tested.
+Single-user deployments can assign `administrator`; the authorization boundary still exists and is tested.
 
 ## Public API protection
 

@@ -1,5 +1,18 @@
 # Testing and quality strategy
 
+## Foundation quality gates
+
+The current walking skeleton runs Go unit tests with the race detector, real
+PostGIS integration tests, `go vet`, `govulncheck`, golangci-lint, generated SQL
+and OpenAPI-client drift checks, React flow tests, an axe accessibility check,
+ESLint, TypeScript checking, a production frontend build, and a production image
+build in CI. Local Compose/image smoke tests cover migrations, readiness, public
+API responses, and SPA delivery.
+
+The remaining sections define the test strategy as ingestion, correlation,
+publication, backup/restore, and report generation are added. A listed target is
+not a claim that the corresponding subsystem already exists.
+
 ## Test pyramid by risk
 
 ### Go unit and property tests

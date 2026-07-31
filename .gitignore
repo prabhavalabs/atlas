@@ -6,6 +6,10 @@
 # Editors and local tooling
 .idea/
 .vscode/
+.worktrees/
+/atlas
+deploy/secrets/*
+!deploy/secrets/.gitkeep
 *.swp
 *.swo
 

@@ -16,7 +16,7 @@
 | Admin account compromise | Low–medium | High | Secure sessions, strong password hashing, rate limit, audit, revocation, TOTP/WebAuthn post-MVP |
 | Feed content exploits parser/browser | Medium | High | Safe parsers, size limits, sanitization, CSP, no source HTML execution, fuzz tests |
 | Global coverage creates false completeness | High | High | Coverage/source-health map, regional gaps, freshness indicators, “not monitored” distinct from “no event” |
-| Disaster traffic spike exhausts VPS | Medium | High | Cacheable public reads, Caddy limits, bounded geometry, load test, emergency static snapshot mode |
+| Disaster traffic spike exhausts VPS | Medium | High | Cloudflare edge controls, cacheable public reads, bounded geometry, load test, emergency static snapshot mode |
 | Configuration/migration drift | Medium | High | Generated `sqlc`, migration checks from empty and previous release, schema-contract integration tests, atomic releases |
 | Full-text search insufficient | Low initially | Low | Measure failed/abandoned searches; improve aliases/trigrams before adding semantic infrastructure |
 | Atlas name conflicts or is confused with another product | Unknown | Medium | Trademark/domain review before public launch; always pair with disaster-monitoring description and Prabhava Labs endorsement |

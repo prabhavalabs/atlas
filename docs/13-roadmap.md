@@ -1,5 +1,14 @@
 # Roadmap and scope
 
+## Current delivery state
+
+The repository has completed the main Phase 1 application slice: Go/PostGIS,
+durable jobs, fixture ingestion, public/admin APIs, local authentication and audit,
+responsive React route shells, OpenAPI generation, Compose, and CI/CD. The
+production deployment and backup/restore rehearsal are the remaining Phase 1
+operational gates. Phases 2–6 remain planned work; an empty production event list
+is correct until licensed real-source adapters are enabled.
+
 ## Phase 0 — decisions and design (1–2 weeks)
 
 Exit criteria:
@@ -11,7 +20,8 @@ Exit criteria:
 - target VPS resources and backup destination are confirmed;
 - architecture and plans in this directory are accepted.
 
-No feature code should precede these gates.
+These decisions were accepted for the foundation on 2026-07-31. Source-specific
+terms remain a gate for each adapter.
 
 ## Phase 1 — walking skeleton (2 weeks)
 

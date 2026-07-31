@@ -2,110 +2,132 @@
 
 ## Production topology
 
-The default target is one Linux VPS with Docker Engine and the Compose plugin:
+Atlas targets one Linux VPS with Docker Engine and the Compose plugin:
 
 ```text
-Internet
-  -> Caddy :80/:443
-      -> Go application :8080 (private Docker network)
-          -> PostgreSQL/PostGIS :5432 (private Docker network)
-
-Persistent volumes
-  - postgres-data
-  - application-data (raw artifacts, optional low-zoom PMTiles)
-  - caddy-data
+Browser
+  -> Cloudflare DNS/TLS/CDN
+      -> outbound Cloudflare Tunnel
+          -> Atlas app :8081 on atlas_edge
+              -> PostgreSQL/PostGIS :5432 on internal atlas_data
 ```
 
-Only ports 80, 443, and restricted SSH are exposed. PostgreSQL is never public. The application image contains the Go binary, migrations, source defaults, public/admin frontend assets, and build metadata.
+The three core containers are `app`, `db`, and `cloudflared`. Atlas publishes no
+host port, so it does not compete with an existing host reverse proxy. The
+`atlas_data` network is internal; only the app can reach both networks. The Vite
+assets, migrations, API, and operator commands live in one non-root distroless
+application image.
 
-## Resource profiles
+## Resource profile
 
-### Core MVP
+The practical foundation target is 4 shared vCPU, 8 GB RAM, and 80–160 GB SSD.
+PostGIS receives the persistent `atlas_postgres` volume and 256 MB shared memory.
+The app uses a read-only root filesystem, a 32 MB temporary filesystem, no Linux
+capabilities, and bounded HTTP/database timeouts.
 
-- 4 shared vCPU
-- 8 GB RAM
-- 80–160 GB SSD
-- 1–2 GB swap for crash protection, not normal operation
+A local model or full global population dataset is not part of the core profile.
+Those features require measured CPU, memory, storage, and failure isolation.
 
-PostgreSQL receives a conservative memory budget; Go and Caddy remain small. Raw artifact retention and database growth are measured from day one.
+## Configuration and secrets
 
-### Core plus local model or full population service
+`.env.example` is the complete non-secret template. Production uses
+`/opt/atlas/.env` with mode `0600`; it contains the database URL/password,
+metrics token, public/API URLs, CORS origin, and cookie domain.
+The Cloudflare tunnel token is a separate deployment-user-readable file at
+`/opt/atlas/secrets/cloudflare_tunnel_token` and reaches cloudflared through
+`TUNNEL_TOKEN_FILE`, so it does not appear in the process command line.
+`ATLAS_RUNTIME_UID` and `ATLAS_RUNTIME_GID` must match the owner of this `0600`
+file (UID/GID 1000 in the reference VPS setup). This lets cloudflared read the
+secret without making it group- or world-readable.
 
-- 8 vCPU
-- 16–32 GB RAM depending on model
-- 200+ GB SSD for database/model/data
+Required public endpoints are:
 
-These are optional profiles. A local model must not contend with ingestion/database memory on the core profile. The full population dataset is benchmarked before it is advertised as a supported profile.
+- `https://atlas.prabhavalabs.com` for the public application and `/admin`;
+- `https://atlas-api.prabhavalabs.com` for `/api`, health, and protected metrics.
 
-## Compose services
+Both Cloudflare public hostnames route to `http://app:8081`. Browser credentials
+work because both hosts are same-site and the CSRF cookie domain is
+`prabhavalabs.com` so the readable, non-secret CSRF token is available to both
+single-level application hosts. The opaque session cookie remains host-only on
+`atlas-api.prabhavalabs.com`. Public CORS is an exact-origin allowlist.
 
-- `proxy`: pinned Caddy image, read-only config, persistent certificate storage.
-- `app`: non-root, read-only root filesystem where possible, health/readiness endpoints, explicit memory/CPU limits.
-- `db`: pinned PostGIS image, checksummed migrations, local-only network, persistent volume.
+## Operator commands
 
-Profiles may add `backup`, `ollama`, or `population`, but core production health never depends on them.
+The image entrypoint accepts:
 
-## Configuration
+- `serve` — migrate, verify the web build, start HTTP, and shut down gracefully;
+- `migrate` — apply embedded Goose migrations;
+- `import-fixture --file <path>` — development/test data only;
+- `create-admin --email <email> --name <name> --role <role>` — reads the password
+  from standard input and stores only an Argon2id hash;
+- `healthcheck` and `version` — container and release diagnostics.
 
-Configuration is environment-driven with a checked-in `.env.example` containing no secrets. Startup validates every setting and exits with actionable errors. Secrets include database password, session key, optional source keys, optional model key, and backup credentials.
+Never import the synthetic fixture into a public production database.
 
-Runtime-tunable source enablement and polling cadence live in the database with audit history. Security-sensitive changes require restart/environment configuration.
+## CI/CD
 
-## Deployment workflow
+`.github/workflows/ci.yml` runs on pull requests and `main`:
 
-1. CI builds and tests backend/frontend.
-2. Generate OpenAPI/client and fail on uncommitted drift.
-3. Build multi-architecture container image with SBOM and immutable version tag.
-4. Scan and sign the image.
-5. VPS pulls the explicit version, never `latest`.
-6. Run backward-compatible migrations as a one-shot command.
-7. Start the new app and wait for readiness.
-8. Run public/admin/source smoke tests.
-9. Keep the previous image and documented rollback command.
+1. generated SQL and OpenAPI-client drift checks;
+2. Go race/unit tests, serialized PostGIS integration tests, vet, vulnerability
+   scanning, and golangci-lint;
+3. React unit/accessibility tests, lint, type checking, and production build;
+4. a complete production-container build.
 
-Migrations follow expand/migrate/contract discipline. A release cannot depend on a schema value that its included migration has not created. Destructive schema cleanup is a later release after compatibility has been observed.
+After successful `main` CI, `release.yml` builds one immutable
+`ghcr.io/prabhavalabs/atlas:sha-<commit>` image, also advances `latest`, and uses a
+dedicated SSH key to update only `/opt/atlas`. Compose waits for database and app
+health. A failed rollout restores the previously running app image. It does not
+restart, reconfigure, or remove unrelated Compose projects.
+
+Repository deployment secrets are `ATLAS_VPS_HOST`, `ATLAS_VPS_USER`,
+`ATLAS_VPS_SSH_KEY`, and `ATLAS_VPS_KNOWN_HOSTS`. The production environment can
+add required reviewers without changing the workflow.
 
 ## Health and observability
 
-- `/health/live`: process is alive; no dependency checks.
-- `/health/ready`: database reachable, migrations current, application initialized.
-- `/metrics`: request latency/status, job queue/age, source freshness/errors, report generation, database pool.
-- Structured JSON logs include request/job/source/event IDs and redact secrets/content bodies.
-- Admin system-health screen translates operational metrics into actions.
+- `/health/live` checks the Go process without dependencies.
+- `/health/ready` verifies database reachability and schema compatibility.
+- `/metrics` requires `Authorization: Bearer <ATLAS_METRICS_TOKEN>` and currently
+  exposes the foundation `atlas_up` gauge. Request, job, source, and database-pool
+  metrics are the next instrumentation increment.
+- JSON lifecycle logs go to Docker stdout/stderr. Secret values and request bodies
+  are never logged.
+- cloudflared exposes its private metrics/ready endpoint only inside `atlas_edge`.
 
-Alerting can initially use a free external HTTP uptime monitor plus a daily local health digest. Inbound monitoring must not be necessary for correctness.
+A free external uptime check can monitor public readiness. Cloudflare Tunnel is
+outbound-only and maintains redundant edge connections; the core app remains
+usable locally if public ingress is interrupted.
 
 ## Backup and restore
 
-- Nightly `pg_dump` in custom format, compressed and encrypted before off-site upload.
-- Daily application-data snapshot for retained raw artifacts and local map fallback.
-- Keep 7 daily, 4 weekly, and 6 monthly backups initially.
-- Validate checksum after upload.
-- Perform a documented restore into an isolated database every month.
-- Record restore duration and the latest restorable point in admin health.
+The database volume is persistent, but a volume is not a backup. Before real-source
+beta, add a nightly custom-format `pg_dump`, encrypt it, upload to an operator-owned
+S3-compatible target, retain 7 daily/4 weekly/6 monthly copies, and perform a
+monthly isolated restore. Backup automation and a demonstrated restore remain a
+beta release gate.
 
-[Backblaze B2](https://www.backblaze.com/cloud-storage/pricing) is a low-cost S3-compatible example, currently including the first 10 GB free according to its transaction pricing page. Any S3-compatible provider works. Restic is an acceptable encrypted file-backup client; database dumps remain the portable recovery artifact.
+## Safe manual deployment
 
-## Updates and maintenance
+```sh
+cd /opt/atlas
+docker compose --env-file .env -f compose.yml config --quiet
+docker compose --env-file .env -f compose.yml pull
+docker compose --env-file .env -f compose.yml up -d --remove-orphans --wait --wait-timeout 180
+docker compose --env-file .env -f compose.yml ps
+```
 
-- Weekly automated dependency update PRs, grouped by risk.
-- Monthly production update window and restore drill.
-- Supported Go and PostgreSQL/PostGIS release policy documented.
-- Source adapters have owner and “last verified” date; stale adapters become visible maintenance work.
-- Quarterly retention/capacity review.
-- Annual key rotation and disaster-recovery exercise.
-
-## Failure playbooks
-
-Runbooks cover: one source stale, all sources stale, database full, migration failure, job backlog, corrupt raw payload, map provider unavailable, model provider unavailable, compromised admin session, incorrect public report, and VPS loss. The expected degraded behavior is defined in tests, not only in prose.
+Use an immutable `ATLAS_IMAGE` value. Record the previous image before changing
+it. Migrations are forward-only; destructive contract migrations require a later
+release after compatibility has been observed.
 
 ## Scaling path
 
-1. Tune indexes/queries and cache headers.
-2. Add a read replica only if database metrics justify it.
-3. Run a second worker from the same application image for job throughput.
-4. Move large artifacts/map archives to object storage/CDN.
-5. Extract population exposure only if its resources interfere with core monitoring.
-6. Move to multiple application replicas with shared Postgres and advisory-lock scheduling.
+1. Tune queries, indexes, retention, and cache headers.
+2. Add job handlers or a second worker from the same image only when queue age
+   demonstrates a need.
+3. Move large raw/map artifacts to object storage.
+4. Add an application replica and tunnel replica when availability requires it.
+5. Extract population exposure only if it measurably interferes with the core.
 
-The application remains useful on the single-VPS topology throughout.
+Redis, a broker, Kubernetes, and public database ports are not baseline answers.

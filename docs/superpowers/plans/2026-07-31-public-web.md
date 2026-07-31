@@ -160,7 +160,7 @@
 - Modify: `web/vite.config.ts`
 - Modify: `web/src/router.tsx`
 - Create: `web/scripts/check-bundle.mjs`
-- Modify: `deploy/Caddyfile`
+- Modify: `deploy/compose.yml`
 
 **Steps:**
 
