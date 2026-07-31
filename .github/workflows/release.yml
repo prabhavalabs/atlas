@@ -52,7 +52,7 @@ jobs:
             org.opencontainers.image.revision=${{ env.SOURCE_SHA }}
             org.opencontainers.image.licenses=Apache-2.0
           build-args: |
-            VITE_API_BASE_URL=https://api.atlas.prabhavalabs.com
+            VITE_API_BASE_URL=https://atlas-api.prabhavalabs.com
             ATLAS_VERSION=sha-${{ env.SOURCE_SHA }}
             ATLAS_COMMIT=${{ env.SOURCE_SHA }}
             ATLAS_BUILD_TIME=${{ github.event.workflow_run.updated_at || 'workflow-dispatch' }}

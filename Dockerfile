@@ -6,7 +6,7 @@ RUN corepack enable && corepack prepare pnpm@11.11.0 --activate
 COPY web/package.json web/pnpm-lock.yaml web/pnpm-workspace.yaml ./
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 COPY web/ ./
-ARG VITE_API_BASE_URL=https://api.atlas.prabhavalabs.com
+ARG VITE_API_BASE_URL=https://atlas-api.prabhavalabs.com
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 RUN pnpm build
 

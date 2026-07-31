@@ -97,3 +97,17 @@ func TestLoadRejectsCSRFCookieDomainOutsidePublicAndAPIHosts(t *testing.T) {
 
 	require.ErrorContains(t, err, "ATLAS_CSRF_COOKIE_DOMAIN")
 }
+
+func TestLoadAcceptsSharedCSRFCookieDomainForSiblingProductionHosts(t *testing.T) {
+	environment := validEnvironment()
+	environment["ATLAS_ENVIRONMENT"] = "production"
+	environment["ATLAS_COOKIE_SECURE"] = "true"
+	environment["ATLAS_PUBLIC_URL"] = "https://atlas.prabhavalabs.com"
+	environment["ATLAS_API_URL"] = "https://atlas-api.prabhavalabs.com"
+	environment["ATLAS_CSRF_COOKIE_DOMAIN"] = "prabhavalabs.com"
+
+	configuration, err := config.Load(lookup(environment))
+
+	require.NoError(t, err)
+	require.Equal(t, "prabhavalabs.com", configuration.CSRFCookieDomain)
+}

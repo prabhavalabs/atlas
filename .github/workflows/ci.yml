@@ -83,7 +83,7 @@ jobs:
       - name: Production build
         working-directory: web
         env:
-          VITE_API_BASE_URL: https://api.atlas.prabhavalabs.com
+          VITE_API_BASE_URL: https://atlas-api.prabhavalabs.com
         run: pnpm build
 
   container:
@@ -100,7 +100,7 @@ jobs:
           push: false
           tags: atlas:ci
           build-args: |
-            VITE_API_BASE_URL=https://api.atlas.prabhavalabs.com
+            VITE_API_BASE_URL=https://atlas-api.prabhavalabs.com
             ATLAS_VERSION=ci
             ATLAS_COMMIT=${{ github.sha }}
             ATLAS_BUILD_TIME=ci

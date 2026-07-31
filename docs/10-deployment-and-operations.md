@@ -40,11 +40,13 @@ The Cloudflare tunnel token is a separate root-readable file at
 Required public endpoints are:
 
 - `https://atlas.prabhavalabs.com` for the public application and `/admin`;
-- `https://api.atlas.prabhavalabs.com` for `/api`, health, and protected metrics.
+- `https://atlas-api.prabhavalabs.com` for `/api`, health, and protected metrics.
 
 Both Cloudflare public hostnames route to `http://app:8080`. Browser credentials
 work because both hosts are same-site and the CSRF cookie domain is
-`atlas.prabhavalabs.com`. Public CORS is an exact-origin allowlist.
+`prabhavalabs.com` so the readable, non-secret CSRF token is available to both
+single-level application hosts. The opaque session cookie remains host-only on
+`atlas-api.prabhavalabs.com`. Public CORS is an exact-origin allowlist.
 
 ## Operator commands
 
