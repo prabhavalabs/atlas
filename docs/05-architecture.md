@@ -13,7 +13,7 @@ flowchart TB
     end
 
     subgraph VPS["Single VPS"]
-        Tunnel["cloudflared: outbound-only connector"]
+        Nginx["Shared host Nginx: TLS and routing"]
         App["Go application"]
         DB[("PostgreSQL + PostGIS")]
 
@@ -26,7 +26,7 @@ flowchart TB
             Auth["Admin auth and audit"]
         end
 
-        Tunnel --> App
+        Nginx --> App
         App --> HTTP
         App --> Ingest
         App --> Events
@@ -39,12 +39,12 @@ flowchart TB
     APIs --> Ingest
     Feeds --> Ingest
     Reports --> Ingest
-    Edge["Cloudflare DNS, TLS, CDN, and abuse controls"] --> Tunnel
+    Edge["Cloudflare DNS, edge TLS, CDN, and abuse controls"] --> Nginx
     Browser["React/Vite public and admin SPA"] --> Edge
     Backup["Encrypted off-site backup"] <-->|"daily"| DB
 ```
 
-The Vite build is copied into the distroless Go image during the multi-stage build. The Go process serves immutable assets, SPA fallbacks, and APIs. Cloudflare terminates public TLS and reaches the private Compose network through an outbound-only tunnel; the VPS exposes no Atlas HTTP port. A separate worker process can be started from the same image only when load measurements justify it; it is not a different service or repository.
+The Vite build is copied into the distroless Go image during the multi-stage build. The Go process serves immutable assets, SPA fallbacks, and APIs. Cloudflare reaches the shared host Nginx through proxied A records; Nginx provides origin TLS and forwards only to the loopback-bound Atlas port. The database remains private. A separate worker process can be started from the same image only when load measurements justify it; it is not a different service or repository.
 
 ## Complexity budget
 
@@ -52,7 +52,7 @@ The core production profile permits:
 
 - one Go application process;
 - one PostgreSQL/PostGIS database;
-- one `cloudflared` connector;
+- one virtual host on the VPS's existing Nginx;
 - local durable storage plus one off-site backup target;
 - external connections only to configured sources, optional map tiles, and an optional report model.
 
