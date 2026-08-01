@@ -81,7 +81,8 @@ Exit: every public fact/report paragraph is traceable and corrections are revers
 
 ## Phase 6 — optional intelligence (after stable beta)
 
-- operator-triggered section renderer with template/Ollama/remote providers;
+- operator-triggered section renderer with template, Ollama, OpenRouter, and
+  direct OpenAI-compatible providers;
 - report evaluation golden set and budget enforcement;
 - additional CAP/NHC/FIRMS adapters;
 - optional population exposure profile;

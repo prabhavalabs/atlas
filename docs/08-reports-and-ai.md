@@ -85,9 +85,17 @@ Implementations:
 
 - `template`: default and always enabled;
 - `ollama`: optional local OpenAI-compatible endpoint for operators with sufficient RAM;
-- `openai-compatible`: optional remote endpoint with model allowlist, timeout, per-report token ceiling, and monthly budget.
+- `openrouter`: optional OpenAI-compatible gateway with a pinned model allowlist,
+  provider/privacy constraints, timeout, per-report token ceiling, and monthly budget;
+- `openai-compatible`: optional direct vendor or self-hosted endpoint with the same
+  local controls.
 
-There is no model router, tool protocol, vector store, or RAG framework in MVP.
+OpenRouter is a convenience adapter, not a runtime dependency: deterministic
+templates continue to work when it is unconfigured, out of credit, rate limited,
+or unavailable. Production never follows a floating “cheapest” or “latest” model
+alias automatically. An administrator must explicitly allow a tested model slug,
+and Atlas records the resolved provider and model with every draft. There is no
+in-process model router, tool protocol, vector store, or RAG framework in MVP.
 
 ## Cost and privacy posture
 
@@ -96,9 +104,23 @@ There is no model router, tool protocol, vector store, or RAG framework in MVP.
 - A daily/monthly hard request and token budget is enforced locally.
 - Free API tiers may use submitted content for provider improvement; do not send sensitive operator notes or embargoed documents.
 - Paid services must be configured so submitted data is not used for training where the provider offers that distinction.
+- OpenRouter requests must use an approved provider policy. Prompt/response
+  logging and training opt-ins remain disabled, and deployments that require it
+  restrict routing to zero-data-retention endpoints. Provider policies still
+  govern data after routing, so they are reviewed before a model is allowed.
+- Free OpenRouter models are suitable for evaluation and low-volume manual
+  drafts, not as an availability dependency. Atlas enforces its own request and
+  spend ceilings regardless of provider-side limits.
 - Local Ollama has no token fee but requires materially more memory/CPU; it is a deployment profile, not part of the core VPS sizing.
 
 As one current example, the [Gemini Developer API](https://ai.google.dev/gemini-api/docs/pricing) offers limited free access for selected models, but free-tier content can be used to improve provider products. Pricing and data terms change, so the admin settings page links to the provider's current terms and never promises a permanent free tier.
+
+OpenRouter exposes an OpenAI-compatible API and a model catalog with current
+pricing metadata. Atlas treats that catalog as operator-facing decision support,
+not dynamic production configuration. Before enabling it, operators review the
+[current pricing](https://openrouter.ai/pricing),
+[data-collection behavior](https://openrouter.ai/docs/guides/privacy/data-collection),
+and [provider retention policies](https://openrouter.ai/docs/guides/privacy/provider-logging/).
 
 ## Editorial safeguards
 
