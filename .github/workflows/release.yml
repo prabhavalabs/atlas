@@ -85,7 +85,7 @@ jobs:
           VPS_USER: ${{ secrets.ATLAS_VPS_USER }}
         run: |
           ssh -i ~/.ssh/atlas_deploy "${VPS_USER}@${VPS_HOST}" 'install -d -m 0750 /opt/atlas'
-          scp -i ~/.ssh/atlas_deploy deploy/compose.yml "${VPS_USER}@${VPS_HOST}:/opt/atlas/compose.yml"
+          scp -i ~/.ssh/atlas_deploy deploy/compose.yml "${VPS_USER}@${VPS_HOST}:/opt/atlas/compose.next.yml"
       - name: Authenticate VPS to GHCR
         shell: bash
         env:
@@ -108,16 +108,31 @@ jobs:
           cd /opt/atlas
           trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
           test -f .env
+          test -f compose.yml
+          test -f compose.next.yml
+          if ! curl --fail --silent --show-error \
+              --resolve atlas.prabhavalabs.com:443:127.0.0.1 \
+              https://atlas.prabhavalabs.com/health/ready >/dev/null \
+            || ! curl --fail --silent --show-error \
+              --resolve atlas-api.prabhavalabs.com:443:127.0.0.1 \
+              https://atlas-api.prabhavalabs.com/health/ready >/dev/null; then
+            echo "Atlas Nginx cutover is not ready; leaving the current deployment unchanged."
+            exit 0
+          fi
           previous_image="$(docker inspect atlas-app-1 --format '{{.Config.Image}}' 2>/dev/null || true)"
           export ATLAS_IMAGE="$DEPLOY_IMAGE"
-          docker compose --env-file .env -f compose.yml config --quiet
-          docker compose --env-file .env -f compose.yml pull
+          docker compose --env-file .env -f compose.next.yml config --quiet
+          docker compose --env-file .env -f compose.next.yml pull
+          cp -p compose.yml compose.rollback.yml
+          mv -f compose.next.yml compose.yml
           if ! docker compose --env-file .env -f compose.yml up -d --remove-orphans --wait --wait-timeout 180; then
+            mv -f compose.rollback.yml compose.yml
             if [ -n "$previous_image" ]; then
               export ATLAS_IMAGE="$previous_image"
-              docker compose --env-file .env -f compose.yml up -d app --wait --wait-timeout 120
+              docker compose --env-file .env -f compose.yml up -d --remove-orphans --wait --wait-timeout 120
             fi
             exit 1
           fi
+          rm -f compose.rollback.yml
           docker compose --env-file .env -f compose.yml ps
           REMOTE

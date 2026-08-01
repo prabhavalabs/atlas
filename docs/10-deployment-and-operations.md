@@ -164,8 +164,11 @@ Never import the synthetic fixture into a public production database.
 After successful `main` CI, `release.yml` builds one immutable
 `ghcr.io/prabhavalabs/atlas:sha-<commit>` image, also advances `latest`, and uses a
 dedicated SSH key to update only `/opt/atlas`. Compose waits for database and app
-health. A failed rollout restores the previously running app image. It does not
-restart, reconfigure, or remove unrelated Compose projects or the shared Nginx.
+health. Before the first tunnel-free release, the workflow requires both local
+HTTPS hostnames to pass certificate and readiness checks; until then, it exits
+without changing the current deployment. A failed rollout restores the previous
+Compose definition and application image. It does not restart, reconfigure, or
+remove unrelated Compose projects or the shared Nginx.
 
 Repository deployment secrets are `ATLAS_VPS_HOST`, `ATLAS_VPS_USER`,
 `ATLAS_VPS_SSH_KEY`, and `ATLAS_VPS_KNOWN_HOSTS`. The production environment can
