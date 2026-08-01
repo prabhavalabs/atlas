@@ -30,13 +30,35 @@ export function EventMap({ events, selectedEventID, onSelect }: EventMapProps) {
     void import("maplibre-gl").then(({ Map, Marker, NavigationControl }) => {
       if (cancelled || !containerRef.current) return
       const selected = events[0]
+      const showAllEvents = events.length > 1
       const map = new Map({
         container: containerRef.current,
         style: OPEN_FREE_MAP_STYLE,
-        center: selected ? [selected.longitude, selected.latitude] : [12, 15],
-        zoom: selected ? 4.2 : 1.5,
+        center:
+          selected && !showAllEvents
+            ? [selected.longitude, selected.latitude]
+            : [12, 15],
+        zoom: selected && !showAllEvents ? 4.2 : 1.5,
         attributionControl: { compact: true },
       })
+      if (showAllEvents) {
+        let west = events[0].longitude
+        let east = events[0].longitude
+        let south = events[0].latitude
+        let north = events[0].latitude
+        for (let index = 1; index < events.length; index += 1) {
+          const event = events[index]
+          west = Math.min(west, event.longitude)
+          east = Math.max(east, event.longitude)
+          south = Math.min(south, event.latitude)
+          north = Math.max(north, event.latitude)
+        }
+        const bounds: [[number, number], [number, number]] = [
+          [west, south],
+          [east, north],
+        ]
+        map.fitBounds(bounds, { duration: 0, maxZoom: 5, padding: 48 })
+      }
       map.addControl(new NavigationControl({ showCompass: false }), "top-right")
       mapRef.current = map
 
