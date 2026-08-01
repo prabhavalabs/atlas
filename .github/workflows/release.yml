@@ -110,12 +110,15 @@ jobs:
           test -f .env
           test -f compose.yml
           test -f compose.next.yml
-          curl --fail --silent --show-error \
-            --resolve atlas.prabhavalabs.com:443:127.0.0.1 \
-            https://atlas.prabhavalabs.com/health/ready >/dev/null
-          curl --fail --silent --show-error \
-            --resolve atlas-api.prabhavalabs.com:443:127.0.0.1 \
-            https://atlas-api.prabhavalabs.com/health/ready >/dev/null
+          if ! curl --fail --silent --show-error \
+              --resolve atlas.prabhavalabs.com:443:127.0.0.1 \
+              https://atlas.prabhavalabs.com/health/ready >/dev/null \
+            || ! curl --fail --silent --show-error \
+              --resolve atlas-api.prabhavalabs.com:443:127.0.0.1 \
+              https://atlas-api.prabhavalabs.com/health/ready >/dev/null; then
+            echo "Atlas Nginx cutover is not ready; leaving the current deployment unchanged."
+            exit 0
+          fi
           previous_image="$(docker inspect atlas-app-1 --format '{{.Config.Image}}' 2>/dev/null || true)"
           export ATLAS_IMAGE="$DEPLOY_IMAGE"
           docker compose --env-file .env -f compose.next.yml config --quiet
