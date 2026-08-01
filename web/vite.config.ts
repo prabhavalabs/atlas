@@ -46,6 +46,9 @@ function mapLibreWorkerAssets(): Plugin {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), mapLibreWorkerAssets()],
+  optimizeDeps: {
+    exclude: ["maplibre-gl"],
+  },
   build: {
     chunkSizeWarningLimit: 1000,
   },
