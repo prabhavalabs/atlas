@@ -38,6 +38,8 @@ The public map provider is configurable so cost or terms do not force an applica
 | Scenario | Direct cost | Infrastructure/privacy |
 |---|---:|---|
 | Deterministic templates | $0 | Core default; strongest reproducibility |
+| OpenRouter free model | $0 within current quota | Evaluation/manual fallback only; model availability and limits can change |
+| OpenRouter paid model | Model-dependent, usage based | Pin an approved model/provider and enforce a smaller local hard budget |
 | Remote free tier | $0 within quota | Quota not an SLA; free-tier submissions may be used for provider improvement |
 | Remote paid, operator-triggered | Usually cents to low single digits/month at MVP volume | Enforce local token/request cap; verify current price and data terms |
 | Local Ollama | $0 per token | Requires 16–32 GB profile for useful models; power/CPU opportunity cost |
