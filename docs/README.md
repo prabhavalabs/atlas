@@ -21,8 +21,8 @@ This directory is the source of truth for the product and technical plan. No pre
 | Maps | MapLibre GL JS; configurable tile provider; low-zoom self-hosted PMTiles fallback |
 | Search | PostgreSQL full-text and trigram search; no Elasticsearch or vector database |
 | AI | Optional report renderer behind a provider interface; deterministic reports always work |
-| Deployment | One VPS with Docker Compose and outbound-only Cloudflare Tunnel ingress |
-| Core containers | Three: application, PostGIS, cloudflared |
+| Deployment | One VPS with Docker Compose behind the shared host Nginx |
+| Core containers | Two: application and PostGIS |
 | License | Apache-2.0 |
 | MVP sources | GDACS, USGS earthquakes, NASA EONET, ReliefWeb, and selected official RSS/Atom/CAP feeds |
 
@@ -54,6 +54,7 @@ This directory is the source of truth for the product and technical plan. No pre
 - [ADR 0005: map delivery](decisions/0005-map-delivery.md)
 - [ADR 0006: open-source license](decisions/0006-open-source-license.md)
 - [ADR 0007: outbound-only Cloudflare Tunnel ingress](decisions/0007-cloudflare-tunnel.md)
+- [ADR 0008: shared host Nginx ingress](decisions/0008-shared-nginx-ingress.md)
 
 ## Implementation plans
 

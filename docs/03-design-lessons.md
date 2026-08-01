@@ -59,6 +59,6 @@ Search provider, browser mode, proxy, and model fallbacks expand the test matrix
 5. Every source exposes freshness, last success, error streak, and last-known-good snapshot.
 6. Core severity and priority use local, deterministic inputs with `unknown` as a first-class state.
 7. Public and administration experiences have different route shells and permissions.
-8. The MVP has an explicit complexity budget: three containers, one datastore, no external queue, no cache service, and no vector database.
+8. The MVP has an explicit complexity budget: two Atlas containers, one datastore, one shared host proxy, no external queue, no cache service, and no vector database.
 9. Architecture decisions have one current document and superseded decisions are marked explicitly.
 10. A feature is not complete until its failure, stale, empty, and recovery states are tested.

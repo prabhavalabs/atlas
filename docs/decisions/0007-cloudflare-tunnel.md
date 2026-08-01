@@ -1,6 +1,6 @@
 # ADR 0007: Use outbound-only Cloudflare Tunnel ingress
 
-- Status: Accepted
+- Status: Superseded by [ADR 0008](0008-shared-nginx-ingress.md)
 - Date: 2026-07-31
 
 ## Context
