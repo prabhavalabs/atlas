@@ -1,5 +1,8 @@
 # Atlas interface direction
 
+For the complete page inventory, user flows, state matrix, and designer-facing
+product context, see the [Atlas product design brief](product-design-brief.md).
+
 Atlas uses a calm cartographic newsroom aesthetic: information-dense, composed,
 and easy to scan during a fast-moving incident. The interface should feel like a
 trusted public utility rather than a command center or a consumer news feed.
