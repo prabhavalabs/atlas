@@ -42,6 +42,7 @@ This directory is the source of truth for the product and technical plan. No pre
 - [Risks and mitigations](12-risks.md)
 - [Roadmap and scope](13-roadmap.md)
 - [Testing and quality](14-testing-and-quality.md)
+- [Product design page and flow brief](design/product-design-brief.md)
 - [Approved interface direction](design/README.md)
 - [OpenAPI contract](../api/openapi.yaml)
 
